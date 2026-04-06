@@ -52,6 +52,7 @@ The following resource accessors are available on the client:
 
 | Method | API path |
 |---|---|
+| `client.clouds` | `cloud` |
 | `client.branches` | `branch` |
 | `client.categories` | `category` |
 | `client.courses` | `course` |
