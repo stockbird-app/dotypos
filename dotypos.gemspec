@@ -13,14 +13,14 @@ Gem::Specification.new do |s|
   s.license     = "MIT"
 
   s.metadata = {
-    "bug_tracker_uri"   => "https://github.com/egorkalinichev/dotypos/issues",
-    "source_code_uri"   => "https://github.com/egorkalinichev/dotypos",
-    "changelog_uri"     => "https://github.com/egorkalinichev/dotypos/blob/main/CHANGELOG.md"
+    "bug_tracker_uri"   => "https://github.com/stockbird-app/dotypos/issues",
+    "source_code_uri"   => "https://github.com/stockbird-app/dotypos",
+    "changelog_uri"     => "https://github.com/stockbird-app/dotypos/blob/main/CHANGELOG.md"
   }
 
   s.required_ruby_version = ">= 3.3.0"
 
-  s.files = Dir["lib/**/*.rb", "LICENSE.txt", "README.md"]
+  s.files = Dir["lib/**/*.rb", "LICENSE.md", "README.md"]
 
   s.add_runtime_dependency "faraday",       "~> 2.7"
   s.add_runtime_dependency "faraday-retry", "~> 2.2"
