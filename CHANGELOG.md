@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-04-07
+
+### Added
+
+- `Dotypos::CloudCollection` — `list` and `get` for the Cloud resource at API paths `clouds` and `clouds/:id`. Cloud endpoints are scoped to the refresh token, not nested under `clouds/:cloudId/…` like the other resource types, so they are handled by this dedicated collection instead of `ResourceCollection`.
+- `Dotypos::Client#clouds` — returns a memoized `CloudCollection` for listing accessible clouds and fetching a cloud by id.
+- `Dotypos::Client#current_cloud` — convenience for `clouds.get(cloud_id)`, i.e. the cloud associated with the client’s configured `cloud_id`.
+
 ## [0.1.0] - 2026-04-07
 
 ### Added
@@ -21,5 +29,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Full error hierarchy under `Dotypos::Error` covering 401, 403, 404, 409, 412, 422, 429, 5xx, and network-level errors
 - Automatic ETag handling for PUT/PATCH — pass a `Resource` object and the ETag is extracted automatically
 
-[Unreleased]: https://github.com/stockbird-app/dotypos/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/stockbird-app/dotypos/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/stockbird-app/dotypos/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/stockbird-app/dotypos/releases/tag/v0.1.0
