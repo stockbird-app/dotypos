@@ -6,6 +6,8 @@ Guidance for AI agents working in this repository.
 
 This is a Ruby gem (`dotypos`) — an API client for the Dotypos (Dotykačka) POS system API v2. It is maintained by the Stockbird team.
 
+**API documentation:** https://docs.api.dotypos.com/ — the authoritative source of truth for all endpoint paths, request/response shapes, authentication flows, and resource definitions.
+
 ## Repository layout
 
 ```
