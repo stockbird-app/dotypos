@@ -5,7 +5,6 @@ RSpec.describe Dotypos::CloudCollection do
   let(:collection) { client.clouds }
 
   let(:clouds_index_url) { "https://api.dotykacka.cz/v2/clouds" }
-  let(:cloud_member_url) { "https://api.dotykacka.cz/v2/clouds/#{CLOUD_ID}" }
 
   let(:cloud_payload) do
     { "id" => CLOUD_ID, "_cloudId" => CLOUD_ID, "name" => "Test Cloud",
@@ -51,6 +50,8 @@ RSpec.describe Dotypos::CloudCollection do
   end
 
   describe "#get" do
+    let(:cloud_member_url) { "https://api.dotykacka.cz/v2/clouds/#{CLOUD_ID}" }
+
     it "GETs /v2/clouds/:id" do
       stub = stub_request(:get, cloud_member_url)
              .to_return(

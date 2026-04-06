@@ -51,6 +51,7 @@ Ruby version is pinned in `.ruby-version` (managed via asdf).
 - Shared test constants (`CLOUD_ID`, `AUTH_URL`, etc.) are defined at the **top level** of `spec/spec_helper.rb` — not inside a module — so they are accessible as bare constants in all spec files.
 - Every spec that makes HTTP calls must stub auth via `stub_auth` or `build_client` before making requests.
 - Run the full suite before committing; suite run should report no errors
+- Run `rubocop -A` before commiting, ensure no unfixed offences remain. Fix as required.
 
 ## Dependency policy
 

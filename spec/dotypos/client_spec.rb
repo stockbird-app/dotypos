@@ -31,8 +31,9 @@ RSpec.describe Dotypos::Client do
     end
 
     it "responds to #clouds and returns a CloudCollection" do
-      expect(client.clouds).to be_a(Dotypos::CloudCollection)
-      expect(client.clouds).to be(client.clouds)
+      clouds_collection = client.clouds
+      expect(clouds_collection).to be_a(Dotypos::CloudCollection)
+      expect(clouds_collection).to be(client.clouds)
     end
   end
 
