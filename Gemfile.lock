@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    dotypos (0.1.0)
+    dotypos (0.2.0)
       faraday (~> 2.7)
       faraday-retry (~> 2.2)
 
