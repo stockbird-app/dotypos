@@ -7,6 +7,7 @@ require_relative "dotypos/resource"
 require_relative "dotypos/paged_result"
 require_relative "dotypos/filter_builder"
 require_relative "dotypos/resource_collection"
+require_relative "dotypos/cloud_collection"
 require_relative "dotypos/client"
 
 module Dotypos

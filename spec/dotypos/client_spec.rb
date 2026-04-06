@@ -29,6 +29,29 @@ RSpec.describe Dotypos::Client do
     it "supports arbitrary paths via #resource" do
       expect(client.resource("custom-path")).to be_a(Dotypos::ResourceCollection)
     end
+
+    it "responds to #clouds and returns a CloudCollection" do
+      clouds_collection = client.clouds
+      expect(clouds_collection).to be_a(Dotypos::CloudCollection)
+      expect(clouds_collection).to be(client.clouds)
+    end
+  end
+
+  describe "#current_cloud" do
+    let(:cloud_url) { "https://api.dotykacka.cz/v2/clouds/#{CLOUD_ID}" }
+    let(:cloud_body) do
+      { "id" => CLOUD_ID, "_cloudId" => CLOUD_ID, "name" => "My Cloud" }
+    end
+
+    it "GETs the cloud for the client's cloud_id" do
+      stub = stub_request(:get, cloud_url)
+             .to_return(status: 200, body: json(cloud_body), headers: api_headers)
+
+      resource = client.current_cloud
+      expect(stub).to have_been_requested.once
+      expect(resource).to be_a(Dotypos::Resource)
+      expect(resource.name).to eq("My Cloud")
+    end
   end
 
   describe "#request" do

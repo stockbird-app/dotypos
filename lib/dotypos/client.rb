@@ -86,6 +86,18 @@ module Dotypos
       ResourceCollection.new(self, path)
     end
 
+    # Top-level clouds for this refresh token (not scoped under +cloud_id+ in the path).
+    #   client.clouds.list
+    #   client.clouds.get("other-cloud-id")
+    def clouds
+      @clouds ||= CloudCollection.new(self)
+    end
+
+    # The cloud resource for this client's +cloud_id+ (same as +clouds.get(cloud_id)+).
+    def current_cloud
+      clouds.get(cloud_id)
+    end
+
     # Makes an authenticated HTTP request. Used internally by ResourceCollection.
     #
     # @param method  [Symbol]  :get, :post, :patch, :put, :delete
