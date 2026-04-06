@@ -21,13 +21,20 @@ module Dotypos
 
   # 4xx client errors
   class ClientError         < Error; end
-  class AuthenticationError < ClientError; end  # 401
-  class ForbiddenError      < ClientError; end  # 403
-  class NotFoundError       < ClientError; end  # 404
-  class ConflictError       < ClientError; end  # 409 — versionDate mismatch
-  class PreconditionError   < ClientError; end  # 412 — ETag mismatch on PUT/PATCH
-  class UnprocessableError  < ClientError; end  # 422
-  class RateLimitError      < ClientError; end  # 429
+  # 401
+  class AuthenticationError < ClientError; end
+  # 403
+  class ForbiddenError      < ClientError; end
+  # 404
+  class NotFoundError       < ClientError; end
+  # 409 — versionDate mismatch
+  class ConflictError       < ClientError; end
+  # 412 — ETag mismatch on PUT/PATCH
+  class PreconditionError   < ClientError; end
+  # 422
+  class UnprocessableError  < ClientError; end
+  # 429
+  class RateLimitError      < ClientError; end
 
   # 5xx server errors
   class ServerError < Error; end

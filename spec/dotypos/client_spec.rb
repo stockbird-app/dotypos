@@ -36,8 +36,8 @@ RSpec.describe Dotypos::Client do
 
     it "sends Bearer token in Authorization header" do
       stub = stub_request(:get, endpoint)
-               .with(headers: { "Authorization" => "Bearer #{ACCESS_TOKEN}" })
-               .to_return(status: 200, body: json({ id: "1" }), headers: api_headers)
+             .with(headers: { "Authorization" => "Bearer #{ACCESS_TOKEN}" })
+             .to_return(status: 200, body: json({ id: "1" }), headers: api_headers)
 
       client.request(:get, "clouds/#{CLOUD_ID}/product")
       expect(stub).to have_been_requested.once
@@ -45,8 +45,8 @@ RSpec.describe Dotypos::Client do
 
     it "sends User-Agent header" do
       stub = stub_request(:get, endpoint)
-               .with(headers: { "User-Agent" => /dotypos-ruby\// })
-               .to_return(status: 200, body: json({ id: "1" }), headers: api_headers)
+             .with(headers: { "User-Agent" => %r{dotypos-ruby/} })
+             .to_return(status: 200, body: json({ id: "1" }), headers: api_headers)
 
       client.request(:get, "clouds/#{CLOUD_ID}/product")
       expect(stub).to have_been_requested.once
@@ -120,8 +120,8 @@ RSpec.describe Dotypos::Client do
     it "includes the ETag from response headers in the result" do
       stub_request(:get, endpoint)
         .to_return(
-          status:  200,
-          body:    json({ id: "1" }),
+          status: 200,
+          body: json({ id: "1" }),
           headers: api_headers.merge("ETag" => '"etag_abc"')
         )
 

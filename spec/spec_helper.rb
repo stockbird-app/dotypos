@@ -14,7 +14,7 @@ module SpecHelpers
     stub_request(:post, AUTH_URL)
       .with(
         headers: { "Authorization" => "User #{REFRESH_TOKEN}" },
-        body:    hash_including("_cloudId" => CLOUD_ID)
+        body: hash_including("_cloudId" => CLOUD_ID)
       )
       .to_return(status: 200, body: AUTH_TOKEN_BODY, headers: { "Content-Type" => "application/json" })
   end

@@ -2,7 +2,7 @@ module Dotypos
   class Configuration
     attr_accessor :timeout, :open_timeout, :logger
 
-    API_BASE_URL = "https://api.dotykacka.cz/v2"
+    API_BASE_URL = "https://api.dotykacka.cz/v2".freeze
 
     def initialize
       @timeout      = 30

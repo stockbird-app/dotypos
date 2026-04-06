@@ -80,7 +80,7 @@ module Dotypos
       id, attrs, tag = resolve_mutation_args(resource_or_id, attributes, options[:etag])
       body     = KeyTransformer.to_camel(attrs.merge(id: id))
       response = @client.request(:patch, member_path(id), body: body,
-                                 headers: { "If-Match" => tag })
+                                                          headers: { "If-Match" => tag })
       Resource.new(response.fetch(:body), etag: response[:etag])
     end
 
@@ -92,12 +92,11 @@ module Dotypos
       id, attrs, tag = resolve_mutation_args(resource_or_id, attributes, options[:etag])
       body     = KeyTransformer.to_camel(attrs.merge(id: id))
       response = @client.request(:put, member_path(id), body: body,
-                                 headers: { "If-Match" => tag })
+                                                        headers: { "If-Match" => tag })
       Resource.new(response.fetch(:body), etag: response[:etag])
     end
 
-    # Deletes the resource with the given id.
-    # Returns true on success.
+    # Deletes the resource with the given id. Returns true on success.
     def delete(id)
       @client.request(:delete, member_path(id))
       true
@@ -114,31 +113,32 @@ module Dotypos
     end
 
     def resolve_mutation_args(resource_or_id, attributes, explicit_etag)
-      if resource_or_id.is_a?(Resource)
-        resource = resource_or_id
-        id       = resource[:id].to_s
-        attrs    = attributes.empty? ? resource.to_h : attributes
-        tag      = explicit_etag || resource.etag
-      else
-        id    = resource_or_id.to_s
-        attrs = attributes
-        tag   = explicit_etag
-      end
+      id, attrs, tag = if resource_or_id.is_a?(Resource)
+                         args_from_resource(resource_or_id, attributes, explicit_etag)
+                       else
+                         [resource_or_id.to_s, attributes, explicit_etag]
+                       end
 
-      if tag.nil?
-        raise ArgumentError,
-              "An ETag is required for PUT/PATCH. Obtain one via #get first, " \
-              "then pass the Resource object or supply etag: explicitly."
-      end
+      raise ArgumentError, etag_required_message if tag.nil?
 
       [id, attrs, tag]
     end
 
+    def args_from_resource(resource, attributes, explicit_etag)
+      id    = resource[:id].to_s
+      attrs = attributes.empty? ? resource.to_h : attributes
+      tag   = explicit_etag || resource.etag
+      [id, attrs, tag]
+    end
+
+    def etag_required_message
+      "An ETag is required for PUT/PATCH. Obtain one via #get first, " \
+        "then pass the Resource object or supply etag: explicitly."
+    end
+
     def normalize_list_params(params)
-      if params[:filter].is_a?(FilterBuilder)
-        params = params.merge(filter: params[:filter].to_s)
-      end
-      params.reject { |_, v| v.nil? }
+      params = params.merge(filter: params[:filter].to_s) if params[:filter].is_a?(FilterBuilder)
+      params.compact
     end
   end
 end

@@ -4,8 +4,8 @@ RSpec.describe Dotypos::TokenManager do
   subject(:manager) do
     described_class.new(
       refresh_token: REFRESH_TOKEN,
-      cloud_id:      CLOUD_ID,
-      base_url:      "https://api.dotykacka.cz/v2/"
+      cloud_id: CLOUD_ID,
+      base_url: "https://api.dotykacka.cz/v2/"
     )
   end
 
@@ -13,7 +13,7 @@ RSpec.describe Dotypos::TokenManager do
     stub_request(:post, AUTH_URL)
       .with(
         headers: { "Authorization" => "User #{REFRESH_TOKEN}" },
-        body:    hash_including("_cloudId" => CLOUD_ID)
+        body: hash_including("_cloudId" => CLOUD_ID)
       )
       .to_return(status: status, body: body, headers: { "Content-Type" => "application/json" })
   end
@@ -43,7 +43,7 @@ RSpec.describe Dotypos::TokenManager do
 
     it "refreshes when token is expired" do
       stub = stub_token
-      manager.access_token  # prime the token
+      manager.access_token # prime the token
 
       # Simulate expiry by backdating @expires_at
       manager.instance_variable_set(:@expires_at, Time.now - 1)
@@ -56,7 +56,7 @@ RSpec.describe Dotypos::TokenManager do
   describe "#force_refresh!" do
     it "fetches a new token even if the current one has not expired" do
       stub = stub_token
-      manager.access_token  # prime
+      manager.access_token # prime
       manager.force_refresh!
       expect(stub).to have_been_requested.twice
     end

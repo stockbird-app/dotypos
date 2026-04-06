@@ -16,7 +16,7 @@ module Dotypos
   class TokenManager
     TOKEN_EXPIRY_SECONDS = 3600
     EXPIRY_BUFFER_SECONDS = 60
-    AUTH_ENDPOINT = "signin/token"
+    AUTH_ENDPOINT = "signin/token".freeze
 
     def initialize(refresh_token:, cloud_id:, base_url:, open_timeout: 5, timeout: 30)
       @refresh_token = refresh_token
@@ -56,28 +56,33 @@ module Dotypos
     end
 
     def refresh!
-      response = auth_connection.post(AUTH_ENDPOINT) do |req|
+      response = post_token_request
+      validate_token_response!(response)
+      store_access_token(response.body)
+    end
+
+    def post_token_request
+      auth_connection.post(AUTH_ENDPOINT) do |req|
         req.headers["Authorization"] = "User #{@refresh_token}"
         req.headers["Content-Type"]  = "application/json"
         req.body = JSON.generate("_cloudId" => @cloud_id)
       end
+    end
 
-      unless response.status == 200
-        raise Dotypos::AuthenticationError.new(
-          "Failed to obtain access token",
-          http_status: response.status,
-          http_body:   response.body
-        )
-      end
+    def validate_token_response!(response)
+      return if response.status == 200
 
-      parsed = JSON.parse(response.body)
+      raise Dotypos::AuthenticationError.new(
+        "Failed to obtain access token",
+        http_status: response.status,
+        http_body: response.body
+      )
+    end
+
+    def store_access_token(body)
+      parsed = JSON.parse(body)
       @access_token = parsed["accessToken"] || parsed["access_token"]
-
-      if @access_token.nil?
-        raise Dotypos::AuthenticationError.new(
-          "No accessToken in auth response: #{response.body}"
-        )
-      end
+      raise Dotypos::AuthenticationError, "No accessToken in auth response: #{body}" if @access_token.nil?
 
       @expires_at = Time.now + TOKEN_EXPIRY_SECONDS
     end

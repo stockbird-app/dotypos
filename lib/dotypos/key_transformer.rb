@@ -48,9 +48,9 @@ module Dotypos
     # Single key: API string → snake_case symbol
     def snake_key(key)
       key.to_s
-         .delete_prefix("_")       # strip leading underscore (_cloudId → cloudId)
-         .gsub(/([A-Z]+)([A-Z][a-z])/, '\1_\2')  # ABCDef → ABC_def
-         .gsub(/([a-z\d])([A-Z])/, '\1_\2')       # camelCase → camel_case
+         .delete_prefix("_") # strip leading underscore (_cloudId → cloudId)
+         .gsub(/([A-Z]+)([A-Z][a-z])/, '\1_\2') # ABCDef → ABC_def
+         .gsub(/([a-z\d])([A-Z])/, '\1_\2') # camelCase → camel_case
          .downcase
          .to_sym
     end

@@ -1,27 +1,27 @@
 require "spec_helper"
 
 RSpec.describe Dotypos::PagedResult do
+  subject(:result) { described_class.new(collection, envelope) }
+
   let(:client)     { build_client }
   let(:collection) { client.orders }
 
   def envelope(overrides = {})
     {
-      current_page:         1,
-      per_page:             20,
-      total_items_on_page:  20,
-      total_items_count:    60,
-      first_page:           1,
-      last_page:            3,
-      next_page:            2,
-      prev_page:            nil,
+      current_page: 1,
+      per_page: 20,
+      total_items_on_page: 20,
+      total_items_count: 60,
+      first_page: 1,
+      last_page: 3,
+      next_page: 2,
+      prev_page: nil,
       data: [
         { "id" => "1", "note" => "Table 1" },
-        { "id" => "2", "note" => "Table 2" }
-      ]
+        { "id" => "2", "note" => "Table 2" },
+      ],
     }.merge(overrides)
   end
-
-  subject(:result) { described_class.new(collection, envelope) }
 
   describe "#data" do
     it "returns an array of Resource objects" do
@@ -80,9 +80,9 @@ RSpec.describe Dotypos::PagedResult do
         .with(query: { "page" => "2" })
         .to_return(
           status: 200,
-          body:   json({ currentPage: 2, perPage: 20, totalItemsOnPage: 5,
-                         totalItemsCount: 25, firstPage: 1, lastPage: 3,
-                         nextPage: nil, prevPage: 1, data: [] }),
+          body: json({ currentPage: 2, perPage: 20, totalItemsOnPage: 5,
+                       totalItemsCount: 25, firstPage: 1, lastPage: 3,
+                       nextPage: nil, prevPage: 1, data: [] }),
           headers: api_headers
         )
 
@@ -104,9 +104,9 @@ RSpec.describe Dotypos::PagedResult do
         .with(query: { "page" => "1" })
         .to_return(
           status: 200,
-          body:   json({ currentPage: 1, perPage: 20, totalItemsOnPage: 20,
-                         totalItemsCount: 40, firstPage: 1, lastPage: 2,
-                         nextPage: 2, prevPage: nil, data: [] }),
+          body: json({ currentPage: 1, perPage: 20, totalItemsOnPage: 20,
+                       totalItemsCount: 40, firstPage: 1, lastPage: 2,
+                       nextPage: 2, prevPage: nil, data: [] }),
           headers: api_headers
         )
 

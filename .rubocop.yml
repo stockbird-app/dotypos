@@ -1,0 +1,82 @@
+plugins:
+  - rubocop-rspec
+
+AllCops:
+  NewCops: enable
+  SuggestExtensions: false
+  TargetRubyVersion: 3.3
+  Include:
+    - "lib/**/*.rb"
+    - "spec/**/*.rb"
+    - "dotypos.gemspec"
+    - "Rakefile"
+  Exclude:
+    - "vendor/**/*"
+
+# ── Style ────────────────────────────────────────────────────────────────────
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: comma
+
+# ── Layout ───────────────────────────────────────────────────────────────────
+
+Layout/LineLength:
+  Max: 120
+
+# ── Metrics ──────────────────────────────────────────────────────────────────
+
+# Client is a well-structured single class; its length is justified.
+Metrics/ClassLength:
+  Max: 150
+
+# Multi-line hash/array literals count as 1 line, keeping test helper hashes
+# from triggering the method-length cop.
+Metrics/MethodLength:
+  CountAsOne:
+    - array
+    - hash
+
+# ── Naming ───────────────────────────────────────────────────────────────────
+
+# #delete is a standard CRUD action name that returns true on success.
+# It is not a predicate despite the boolean return value.
+Naming/PredicateMethod:
+  AllowedPatterns:
+    - "^delete$"
+
+# ── Gemspec ──────────────────────────────────────────────────────────────────
+
+# Dev dependencies in gemspec is standard for distributed gems.
+Gemspec/DevelopmentDependencies:
+  Enabled: false
+
+# ── RSpec ────────────────────────────────────────────────────────────────────
+
+RSpec/ExampleLength:
+  Max: 20
+
+RSpec/MultipleExpectations:
+  Max: 4
+
+RSpec/NestedGroups:
+  Max: 4
+
+RSpec/ContextWording:
+  Prefixes:
+    - when
+    - with
+    - without
+    - and
+    - for

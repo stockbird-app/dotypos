@@ -25,28 +25,39 @@ module Dotypos
   #   customer = client.customers.get("789")
   #   client.customers.update(customer, name: "New Name")
   class Client
-    API_BASE_URL = "https://api.dotykacka.cz/v2/"
+    API_BASE_URL = "https://api.dotykacka.cz/v2/".freeze
 
     # All supported resource types.
     # key   = Ruby method name (snake_case, plural)
     # value = API path segment (as used in /v2/clouds/:cloudId/<segment>)
     RESOURCES = {
-      branches:     "branch",
-      categories:   "category",
-      courses:       "course",
-      customers:    "customer",
-      employees:    "employee",
-      order_items:  "order-item",
-      orders:       "order",
-      points_logs:  "pointslog",
-      printers:     "printer",
-      products:     "product",
+      branches: "branch",
+      categories: "category",
+      courses: "course",
+      customers: "customer",
+      employees: "employee",
+      order_items: "order-item",
+      orders: "order",
+      points_logs: "pointslog",
+      printers: "printer",
+      products: "product",
       reservations: "reservation",
-      stock_logs:   "stocklog",
-      suppliers:    "supplier",
-      tags:         "tag",
-      warehouses:   "warehouse",
-      webhooks:     "webhook"
+      stock_logs: "stocklog",
+      suppliers: "supplier",
+      tags: "tag",
+      warehouses: "warehouse",
+      webhooks: "webhook",
+    }.freeze
+
+    # Maps HTTP error status codes to [ErrorClass, default_message] pairs.
+    ERROR_MAP = {
+      401 => [AuthenticationError, "Authentication failed"],
+      403 => [ForbiddenError, "Forbidden"],
+      404 => [NotFoundError, "Resource not found"],
+      409 => [ConflictError, "Conflict — versionDate mismatch"],
+      412 => [PreconditionError, "ETag mismatch — resource was modified since last read"],
+      422 => [UnprocessableError, "Unprocessable entity"],
+      429 => [RateLimitError, "Rate limit exceeded"],
     }.freeze
 
     attr_reader :cloud_id
@@ -61,14 +72,7 @@ module Dotypos
       @timeout       = timeout
       @open_timeout  = open_timeout
       @logger        = logger
-
-      @token_manager = TokenManager.new(
-        refresh_token: refresh_token,
-        cloud_id:      @cloud_id,
-        base_url:      API_BASE_URL,
-        timeout:       timeout,
-        open_timeout:  open_timeout
-      )
+      @token_manager = build_token_manager(refresh_token, timeout, open_timeout)
     end
 
     # Dynamically define accessor methods for each resource type.
@@ -85,37 +89,40 @@ module Dotypos
     # Makes an authenticated HTTP request. Used internally by ResourceCollection.
     #
     # @param method  [Symbol]  :get, :post, :patch, :put, :delete
-    # @param path    [String]  path relative to API_BASE_URL (e.g. "/clouds/123/order")
+    # @param path    [String]  path relative to API_BASE_URL (e.g. "clouds/123/order")
     # @param params  [Hash]    query parameters
     # @param body    [Hash, nil] request body (will be JSON-encoded)
     # @param headers [Hash]    additional request headers
     # @return [Hash] { body: parsed_response, etag: "..." }
     def request(method, path, params: {}, body: nil, headers: {})
-      access_token = @token_manager.access_token
-      response     = execute_request(method, path,
-                                     params:  params,
-                                     body:    body,
-                                     headers: headers,
-                                     token:   access_token)
-
-      # Transparently retry once on 401 (token may have been invalidated server-side)
-      if response.status == 401
-        access_token = @token_manager.force_refresh!
-        response     = execute_request(method, path,
-                                       params:  params,
-                                       body:    body,
-                                       headers: headers,
-                                       token:   access_token)
-      end
-
+      response = execute_with_token_refresh(method, path, params: params, body: body, headers: headers)
       handle_response(response)
     end
 
     private
 
-    def execute_request(method, path, params:, body:, headers:, token:)
-      conn = connection
-      conn.run_request(method, path, body ? body.to_json : nil, request_headers(token, headers)) do |req|
+    def build_token_manager(refresh_token, timeout, open_timeout)
+      TokenManager.new(
+        refresh_token: refresh_token,
+        cloud_id: @cloud_id,
+        base_url: API_BASE_URL,
+        timeout: timeout,
+        open_timeout: open_timeout
+      )
+    end
+
+    def execute_with_token_refresh(method, path, params:, body:, headers:)
+      token    = @token_manager.access_token
+      response = execute_request(method, path, params: params, body: body, headers: headers, token: token)
+      return response unless response.status == 401
+
+      # Transparently retry once (token may have been invalidated server-side)
+      execute_request(method, path, params: params, body: body, headers: headers,
+                                    token: @token_manager.force_refresh!)
+    end
+
+    def execute_request(method, path, params:, body:, headers:, token:) # rubocop:disable Metrics/ParameterLists
+      connection.run_request(method, path, body&.to_json, request_headers(token, headers)) do |req|
         req.params = params unless params.empty?
       end
     rescue Faraday::ConnectionFailed => e
@@ -125,60 +132,26 @@ module Dotypos
     end
 
     def handle_response(response)
-      body   = parse_body(response.body)
-      etag   = response.headers["etag"] || response.headers["ETag"]
+      body = parse_body(response.body)
+      etag = response.headers["etag"] || response.headers["ETag"]
 
-      case response.status
-      when 200..299
-        { body: body, etag: etag }
-      when 304
-        { body: nil, etag: etag }
-      when 401
-        raise Dotypos::AuthenticationError.new(
-          error_message(body, "Authentication failed"),
-          http_status: 401, http_body: response.body, http_headers: response.headers
-        )
-      when 403
-        raise Dotypos::ForbiddenError.new(
-          error_message(body, "Forbidden"),
-          http_status: 403, http_body: response.body, http_headers: response.headers
-        )
-      when 404
-        raise Dotypos::NotFoundError.new(
-          error_message(body, "Resource not found"),
-          http_status: 404, http_body: response.body, http_headers: response.headers
-        )
-      when 409
-        raise Dotypos::ConflictError.new(
-          error_message(body, "Conflict — versionDate mismatch"),
-          http_status: 409, http_body: response.body, http_headers: response.headers
-        )
-      when 412
-        raise Dotypos::PreconditionError.new(
-          error_message(body, "ETag mismatch — resource was modified since last read"),
-          http_status: 412, http_body: response.body, http_headers: response.headers
-        )
-      when 422
-        raise Dotypos::UnprocessableError.new(
-          error_message(body, "Unprocessable entity"),
-          http_status: 422, http_body: response.body, http_headers: response.headers
-        )
-      when 429
-        raise Dotypos::RateLimitError.new(
-          "Rate limit exceeded",
-          http_status: 429, http_body: response.body, http_headers: response.headers
-        )
-      when 500..599
-        raise Dotypos::ServerError.new(
-          error_message(body, "Server error"),
-          http_status: response.status, http_body: response.body, http_headers: response.headers
-        )
-      else
-        raise Dotypos::Error.new(
-          "Unexpected response status #{response.status}",
-          http_status: response.status, http_body: response.body
-        )
-      end
+      return { body: body, etag: etag } if (200..299).cover?(response.status)
+      return { body: nil, etag: etag }  if response.status == 304
+
+      raise_error_for(response, body)
+    end
+
+    def raise_error_for(response, body)
+      klass, default_msg = ERROR_MAP[response.status]
+      klass       ||= response.status >= 500 ? ServerError : Error
+      default_msg ||= response.status >= 500 ? "Server error" : "Unexpected status #{response.status}"
+
+      raise klass.new(
+        error_message(body, default_msg),
+        http_status: response.status,
+        http_body: response.body,
+        http_headers: response.headers
+      )
     end
 
     def connection
@@ -193,9 +166,9 @@ module Dotypos
     def request_headers(token, extra = {})
       {
         "Authorization" => "Bearer #{token}",
-        "Content-Type"  => "application/json",
-        "Accept"        => "application/json",
-        "User-Agent"    => "dotypos-ruby/#{Dotypos::VERSION} ruby/#{RUBY_VERSION}"
+        "Content-Type" => "application/json",
+        "Accept" => "application/json",
+        "User-Agent" => "dotypos-ruby/#{Dotypos::VERSION} ruby/#{RUBY_VERSION}",
       }.merge(extra)
     end
 

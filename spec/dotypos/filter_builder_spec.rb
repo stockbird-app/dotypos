@@ -47,7 +47,7 @@ RSpec.describe Dotypos::FilterBuilder do
     end
 
     it "serializes arrays as comma-separated values (for :in)" do
-      builder.where(:status, :in, ["open", "closed"])
+      builder.where(:status, :in, %w[open closed])
       expect(builder.to_s).to eq("status|in|open,closed")
     end
 
@@ -72,16 +72,16 @@ RSpec.describe Dotypos::FilterBuilder do
   describe "operator validation" do
     it "accepts all valid operators" do
       %w[eq ne gt gteq lt lteq like in notin bin bex].each do |op|
-        expect {
+        expect do
           described_class.build { |f| f.where(:name, op.to_sym, "value") }
-        }.not_to raise_error
+        end.not_to raise_error
       end
     end
 
     it "raises ArgumentError for invalid operators" do
-      expect {
+      expect do
         described_class.build { |f| f.where(:name, :invalid_op, "value") }
-      }.to raise_error(ArgumentError, /Invalid filter operator/)
+      end.to raise_error(ArgumentError, /Invalid filter operator/)
     end
   end
 

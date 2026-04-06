@@ -24,16 +24,7 @@ module Dotypos
     def initialize(collection, envelope, request_params = {})
       @collection     = collection
       @request_params = request_params
-
-      @data                = Array(envelope[:data]).map { |item| Resource.new(item) }
-      @current_page        = envelope[:current_page]
-      @per_page            = envelope[:per_page]
-      @total_items_on_page = envelope[:total_items_on_page]
-      @total_items_count   = envelope[:total_items_count]
-      @first_page          = envelope[:first_page]
-      @last_page           = envelope[:last_page]
-      @next_page_number    = envelope[:next_page]
-      @prev_page_number    = envelope[:prev_page]
+      assign_envelope(envelope)
     end
 
     # True when the API reports a next page exists.
@@ -71,8 +62,22 @@ module Dotypos
     end
 
     def inspect
-      "#<#{self.class.name} page=#{current_page} items=#{data.size}" \
-        " next=#{next_page?} prev=#{prev_page?}>"
+      "#<#{self.class.name} page=#{current_page} items=#{data.size} " \
+        "next=#{next_page?} prev=#{prev_page?}>"
+    end
+
+    private
+
+    def assign_envelope(envelope)
+      @data                = Array(envelope[:data]).map { |item| Resource.new(item) }
+      @current_page        = envelope[:current_page]
+      @per_page            = envelope[:per_page]
+      @total_items_on_page = envelope[:total_items_on_page]
+      @total_items_count   = envelope[:total_items_count]
+      @first_page          = envelope[:first_page]
+      @last_page           = envelope[:last_page]
+      @next_page_number    = envelope[:next_page]
+      @prev_page_number    = envelope[:prev_page]
     end
   end
 end

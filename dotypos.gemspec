@@ -13,19 +13,22 @@ Gem::Specification.new do |s|
   s.license     = "MIT"
 
   s.metadata = {
-    "bug_tracker_uri"   => "https://github.com/stockbird-app/dotypos/issues",
-    "source_code_uri"   => "https://github.com/stockbird-app/dotypos",
-    "changelog_uri"     => "https://github.com/stockbird-app/dotypos/blob/main/CHANGELOG.md"
+    "bug_tracker_uri" => "https://github.com/stockbird-app/dotypos/issues",
+    "changelog_uri" => "https://github.com/stockbird-app/dotypos/blob/main/CHANGELOG.md",
+    "rubygems_mfa_required" => "true",
+    "source_code_uri" => "https://github.com/stockbird-app/dotypos",
   }
 
   s.required_ruby_version = ">= 3.3.0"
 
   s.files = Dir["lib/**/*.rb", "LICENSE.md", "README.md"]
 
-  s.add_runtime_dependency "faraday",       "~> 2.7"
-  s.add_runtime_dependency "faraday-retry", "~> 2.2"
+  s.add_dependency "faraday", "~> 2.7"
+  s.add_dependency "faraday-retry", "~> 2.2"
 
-  s.add_development_dependency "rspec",   "~> 3.13"
+  s.add_development_dependency "rake", "~> 13.0"
+  s.add_development_dependency "rspec", "~> 3.13"
+  s.add_development_dependency "rubocop", "~> 1.68"
+  s.add_development_dependency "rubocop-rspec", "~> 3.2"
   s.add_development_dependency "webmock", "~> 3.23"
-  s.add_development_dependency "rake",    "~> 13.0"
 end
