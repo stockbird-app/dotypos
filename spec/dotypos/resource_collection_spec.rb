@@ -72,6 +72,31 @@ RSpec.describe Dotypos::ResourceCollection do
       collection.list(filter: nil)
       expect(stub).to have_been_requested.once
     end
+
+    it "sends Allow-Version: BC1 header so empty collections return 200 instead of 404" do
+      stub = stub_request(:get, "#{API_BASE}/orders")
+             .with(headers: { "Allow-Version" => "BC1" })
+             .to_return(status: 200, body: json(list_response), headers: api_headers)
+
+      collection.list
+      expect(stub).to have_been_requested.once
+    end
+
+    it "returns an empty PagedResult when the collection has no items (BC1 200 response)" do
+      empty_response = {
+        currentPage: 1, perPage: 20, totalItemsOnPage: 0,
+        totalItemsCount: 0, firstPage: 1, lastPage: 1,
+        nextPage: nil, prevPage: nil,
+        data: []
+      }
+      stub_request(:get, "#{API_BASE}/orders")
+        .to_return(status: 200, body: json(empty_response), headers: api_headers)
+
+      result = collection.list
+      expect(result).to be_a(Dotypos::PagedResult)
+      expect(result.data).to be_empty
+      expect(result.total_items_count).to eq(0)
+    end
   end
 
   describe "#get" do

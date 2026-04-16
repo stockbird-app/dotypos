@@ -41,7 +41,10 @@ module Dotypos
     #   filter can be a String (raw API filter) or a FilterBuilder instance.
     def list(params = {})
       params = normalize_list_params(params)
-      response = @client.request(:get, collection_path, params: params)
+      # BC1 header makes the API return 200 + empty pagination JSON when no
+      # results exist, instead of the default BC0 behaviour of returning 404.
+      response = @client.request(:get, collection_path, params: params,
+                                                        headers: { "Allow-Version" => "BC1" })
       envelope = KeyTransformer.to_snake(response.fetch(:body))
       PagedResult.new(self, envelope, params)
     end
