@@ -50,25 +50,25 @@ The gem handles authentication automatically. You only need to supply a `refresh
 
 The following resource accessors are available on the client:
 
-| Method | API path |
+| Method | API path segment (`…/v2/clouds/:cloudId/<segment>`) |
 |---|---|
-| `client.clouds` | `cloud` |
-| `client.branches` | `branch` |
-| `client.categories` | `category` |
-| `client.courses` | `course` |
-| `client.customers` | `customer` |
-| `client.employees` | `employee` |
-| `client.order_items` | `order-item` |
-| `client.orders` | `order` |
-| `client.points_logs` | `pointslog` |
-| `client.printers` | `printer` |
-| `client.products` | `product` |
-| `client.reservations` | `reservation` |
-| `client.stock_logs` | `stocklog` |
-| `client.suppliers` | `supplier` |
-| `client.tags` | `tag` |
-| `client.warehouses` | `warehouse` |
-| `client.webhooks` | `webhook` |
+| `client.clouds` | `clouds` (top-level; not under `clouds/:cloudId/…`) |
+| `client.branches` | `branches` |
+| `client.categories` | `categories` |
+| `client.courses` | `courses` |
+| `client.customers` | `customers` |
+| `client.employees` | `employees` |
+| `client.order_items` | `order-items` |
+| `client.orders` | `orders` |
+| `client.points_logs` | `points-logs` |
+| `client.printers` | `printers` |
+| `client.products` | `products` |
+| `client.reservations` | `reservations` |
+| `client.stock_logs` | `stock-logs` |
+| `client.suppliers` | `suppliers` |
+| `client.tags` | `tags` |
+| `client.warehouses` | `warehouses` |
+| `client.webhooks` | `webhooks` |
 
 For any path not in the list above:
 

@@ -76,7 +76,7 @@ RSpec.describe Dotypos::PagedResult do
     end
 
     it "fetches the next page" do
-      stub_request(:get, "#{API_BASE}/order")
+      stub_request(:get, "#{API_BASE}/orders")
         .with(query: { "page" => "2" })
         .to_return(
           status: 200,
@@ -100,7 +100,7 @@ RSpec.describe Dotypos::PagedResult do
     it "fetches the previous page" do
       r = described_class.new(collection, envelope(current_page: 2, prev_page: 1))
 
-      stub_request(:get, "#{API_BASE}/order")
+      stub_request(:get, "#{API_BASE}/orders")
         .with(query: { "page" => "1" })
         .to_return(
           status: 200,

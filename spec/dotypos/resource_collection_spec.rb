@@ -20,7 +20,7 @@ RSpec.describe Dotypos::ResourceCollection do
     end
 
     it "returns a PagedResult" do
-      stub_request(:get, "#{API_BASE}/order")
+      stub_request(:get, "#{API_BASE}/orders")
         .to_return(status: 200, body: json(list_response), headers: api_headers)
 
       result = collection.list
@@ -28,7 +28,7 @@ RSpec.describe Dotypos::ResourceCollection do
     end
 
     it "populates data with Resource objects" do
-      stub_request(:get, "#{API_BASE}/order")
+      stub_request(:get, "#{API_BASE}/orders")
         .to_return(status: 200, body: json(list_response), headers: api_headers)
 
       resources = collection.list.data
@@ -37,7 +37,7 @@ RSpec.describe Dotypos::ResourceCollection do
     end
 
     it "passes page and limit params" do
-      stub = stub_request(:get, "#{API_BASE}/order")
+      stub = stub_request(:get, "#{API_BASE}/orders")
              .with(query: { "page" => "2", "limit" => "50" })
              .to_return(status: 200, body: json(list_response), headers: api_headers)
 
@@ -46,7 +46,7 @@ RSpec.describe Dotypos::ResourceCollection do
     end
 
     it "passes a raw filter string" do
-      stub = stub_request(:get, "#{API_BASE}/order")
+      stub = stub_request(:get, "#{API_BASE}/orders")
              .with(query: { "filter" => "deleted|eq|0" })
              .to_return(status: 200, body: json(list_response), headers: api_headers)
 
@@ -56,7 +56,7 @@ RSpec.describe Dotypos::ResourceCollection do
 
     it "accepts a FilterBuilder object for the filter param" do
       filter = Dotypos::FilterBuilder.build { |f| f.where(:deleted, :eq, false) }
-      stub = stub_request(:get, "#{API_BASE}/order")
+      stub = stub_request(:get, "#{API_BASE}/orders")
              .with(query: { "filter" => "deleted|eq|0" })
              .to_return(status: 200, body: json(list_response), headers: api_headers)
 
@@ -65,7 +65,7 @@ RSpec.describe Dotypos::ResourceCollection do
     end
 
     it "omits nil params" do
-      stub = stub_request(:get, "#{API_BASE}/order")
+      stub = stub_request(:get, "#{API_BASE}/orders")
              .with(query: {})
              .to_return(status: 200, body: json(list_response), headers: api_headers)
 
@@ -76,7 +76,7 @@ RSpec.describe Dotypos::ResourceCollection do
 
   describe "#get" do
     it "returns a Resource with the ETag set" do
-      stub_request(:get, "#{API_BASE}/order/100")
+      stub_request(:get, "#{API_BASE}/orders/100")
         .to_return(
           status: 200,
           body: json(order_payload),
@@ -92,7 +92,7 @@ RSpec.describe Dotypos::ResourceCollection do
 
   describe "#create" do
     it "POSTs camelCase body and returns a Resource" do
-      stub = stub_request(:post, "#{API_BASE}/order")
+      stub = stub_request(:post, "#{API_BASE}/orders")
              .with(body: hash_including("note" => "Table 5"))
              .to_return(
                status: 201,
@@ -107,7 +107,7 @@ RSpec.describe Dotypos::ResourceCollection do
     end
 
     it "converts snake_case keys to camelCase in the request body" do
-      stub = stub_request(:post, "#{API_BASE}/order")
+      stub = stub_request(:post, "#{API_BASE}/orders")
              .with(body: hash_including("totalPrice" => "99.99"))
              .to_return(status: 201, body: json(order_payload), headers: api_headers)
 
@@ -116,7 +116,7 @@ RSpec.describe Dotypos::ResourceCollection do
     end
 
     it "returns an array of Resources for batch responses" do
-      stub_request(:post, "#{API_BASE}/order")
+      stub_request(:post, "#{API_BASE}/orders")
         .to_return(status: 201, body: json([order_payload, order_payload]), headers: api_headers)
 
       result = collection.create([{ note: "A" }, { note: "B" }])
@@ -129,7 +129,7 @@ RSpec.describe Dotypos::ResourceCollection do
     let(:resource) { Dotypos::Resource.new(order_payload, etag: '"original_etag"') }
 
     it "sends PATCH with If-Match header when given a Resource" do
-      stub = stub_request(:patch, "#{API_BASE}/order/100")
+      stub = stub_request(:patch, "#{API_BASE}/orders/100")
              .with(headers: { "If-Match" => '"original_etag"' })
              .to_return(status: 200, body: json(order_payload), headers: api_headers)
 
@@ -138,7 +138,7 @@ RSpec.describe Dotypos::ResourceCollection do
     end
 
     it "sends PATCH with explicit etag keyword arg" do
-      stub = stub_request(:patch, "#{API_BASE}/order/100")
+      stub = stub_request(:patch, "#{API_BASE}/orders/100")
              .with(headers: { "If-Match" => '"explicit_etag"' })
              .to_return(status: 200, body: json(order_payload), headers: api_headers)
 
@@ -153,7 +153,7 @@ RSpec.describe Dotypos::ResourceCollection do
     end
 
     it "returns the updated Resource" do
-      stub_request(:patch, "#{API_BASE}/order/100")
+      stub_request(:patch, "#{API_BASE}/orders/100")
         .to_return(status: 200, body: json(order_payload.merge("note" => "Updated")),
                    headers: api_headers)
 
@@ -167,7 +167,7 @@ RSpec.describe Dotypos::ResourceCollection do
     let(:resource) { Dotypos::Resource.new(order_payload, etag: '"original_etag"') }
 
     it "sends PUT with If-Match header" do
-      stub = stub_request(:put, "#{API_BASE}/order/100")
+      stub = stub_request(:put, "#{API_BASE}/orders/100")
              .with(headers: { "If-Match" => '"original_etag"' })
              .to_return(status: 200, body: json(order_payload), headers: api_headers)
 
@@ -178,7 +178,7 @@ RSpec.describe Dotypos::ResourceCollection do
 
   describe "#delete" do
     it "sends DELETE and returns true" do
-      stub_request(:delete, "#{API_BASE}/order/100")
+      stub_request(:delete, "#{API_BASE}/orders/100")
         .to_return(status: 204, body: "", headers: {})
 
       expect(collection.delete("100")).to be true

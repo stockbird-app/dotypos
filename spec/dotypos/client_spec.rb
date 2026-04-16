@@ -55,14 +55,14 @@ RSpec.describe Dotypos::Client do
   end
 
   describe "#request" do
-    let(:endpoint) { "#{API_BASE}/product" }
+    let(:endpoint) { "#{API_BASE}/products" }
 
     it "sends Bearer token in Authorization header" do
       stub = stub_request(:get, endpoint)
              .with(headers: { "Authorization" => "Bearer #{ACCESS_TOKEN}" })
              .to_return(status: 200, body: json({ id: "1" }), headers: api_headers)
 
-      client.request(:get, "clouds/#{CLOUD_ID}/product")
+      client.request(:get, "clouds/#{CLOUD_ID}/products")
       expect(stub).to have_been_requested.once
     end
 
@@ -71,7 +71,7 @@ RSpec.describe Dotypos::Client do
              .with(headers: { "User-Agent" => %r{dotypos-ruby/} })
              .to_return(status: 200, body: json({ id: "1" }), headers: api_headers)
 
-      client.request(:get, "clouds/#{CLOUD_ID}/product")
+      client.request(:get, "clouds/#{CLOUD_ID}/products")
       expect(stub).to have_been_requested.once
     end
 
@@ -87,7 +87,7 @@ RSpec.describe Dotypos::Client do
       stub_request(:post, AUTH_URL)
         .to_return(status: 200, body: AUTH_TOKEN_BODY, headers: api_headers)
 
-      result = client.request(:get, "clouds/#{CLOUD_ID}/product")
+      result = client.request(:get, "clouds/#{CLOUD_ID}/products")
       expect(result[:body]).to eq({ "id" => "1" })
     end
 
@@ -97,7 +97,7 @@ RSpec.describe Dotypos::Client do
       stub_request(:post, AUTH_URL)
         .to_return(status: 200, body: AUTH_TOKEN_BODY, headers: api_headers)
 
-      expect { client.request(:get, "clouds/#{CLOUD_ID}/product") }
+      expect { client.request(:get, "clouds/#{CLOUD_ID}/products") }
         .to raise_error(Dotypos::AuthenticationError)
     end
 
@@ -105,7 +105,7 @@ RSpec.describe Dotypos::Client do
       stub_request(:get, endpoint)
         .to_return(status: 404, body: json({ message: "Not found" }), headers: api_headers)
 
-      expect { client.request(:get, "clouds/#{CLOUD_ID}/product") }
+      expect { client.request(:get, "clouds/#{CLOUD_ID}/products") }
         .to raise_error(Dotypos::NotFoundError)
     end
 
@@ -113,7 +113,7 @@ RSpec.describe Dotypos::Client do
       stub_request(:get, endpoint)
         .to_return(status: 429, body: "", headers: api_headers)
 
-      expect { client.request(:get, "clouds/#{CLOUD_ID}/product") }
+      expect { client.request(:get, "clouds/#{CLOUD_ID}/products") }
         .to raise_error(Dotypos::RateLimitError)
     end
 
@@ -121,7 +121,7 @@ RSpec.describe Dotypos::Client do
       stub_request(:patch, endpoint)
         .to_return(status: 412, body: json({ message: "ETag mismatch" }), headers: api_headers)
 
-      expect { client.request(:patch, "clouds/#{CLOUD_ID}/product", headers: { "If-Match" => "old" }) }
+      expect { client.request(:patch, "clouds/#{CLOUD_ID}/products", headers: { "If-Match" => "old" }) }
         .to raise_error(Dotypos::PreconditionError)
     end
 
@@ -129,14 +129,14 @@ RSpec.describe Dotypos::Client do
       stub_request(:get, endpoint)
         .to_return(status: 500, body: json({ message: "Internal error" }), headers: api_headers)
 
-      expect { client.request(:get, "clouds/#{CLOUD_ID}/product") }
+      expect { client.request(:get, "clouds/#{CLOUD_ID}/products") }
         .to raise_error(Dotypos::ServerError)
     end
 
     it "raises ConnectionError on network failure" do
       stub_request(:get, endpoint).to_raise(Faraday::ConnectionFailed.new("Connection refused"))
 
-      expect { client.request(:get, "clouds/#{CLOUD_ID}/product") }
+      expect { client.request(:get, "clouds/#{CLOUD_ID}/products") }
         .to raise_error(Dotypos::ConnectionError)
     end
 
@@ -148,7 +148,7 @@ RSpec.describe Dotypos::Client do
           headers: api_headers.merge("ETag" => '"etag_abc"')
         )
 
-      result = client.request(:get, "clouds/#{CLOUD_ID}/product")
+      result = client.request(:get, "clouds/#{CLOUD_ID}/products")
       expect(result[:etag]).to eq('"etag_abc"')
     end
   end

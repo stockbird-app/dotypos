@@ -29,24 +29,24 @@ module Dotypos
 
     # All supported resource types.
     # key   = Ruby method name (snake_case, plural)
-    # value = API path segment (as used in /v2/clouds/:cloudId/<segment>)
+    # value = API path segment (as in GET /v2/clouds/:cloudId/<segment> per API docs)
     RESOURCES = {
-      branches: "branch",
-      categories: "category",
-      courses: "course",
-      customers: "customer",
-      employees: "employee",
-      order_items: "order-item",
-      orders: "order",
-      points_logs: "pointslog",
-      printers: "printer",
-      products: "product",
-      reservations: "reservation",
-      stock_logs: "stocklog",
-      suppliers: "supplier",
-      tags: "tag",
-      warehouses: "warehouse",
-      webhooks: "webhook",
+      branches: "branches",
+      categories: "categories",
+      courses: "courses",
+      customers: "customers",
+      employees: "employees",
+      order_items: "order-items",
+      orders: "orders",
+      points_logs: "points-logs",
+      printers: "printers",
+      products: "products",
+      reservations: "reservations",
+      stock_logs: "stock-logs",
+      suppliers: "suppliers",
+      tags: "tags",
+      warehouses: "warehouses",
+      webhooks: "webhooks",
     }.freeze
 
     # Maps HTTP error status codes to [ErrorClass, default_message] pairs.
@@ -101,7 +101,7 @@ module Dotypos
     # Makes an authenticated HTTP request. Used internally by ResourceCollection.
     #
     # @param method  [Symbol]  :get, :post, :patch, :put, :delete
-    # @param path    [String]  path relative to API_BASE_URL (e.g. "clouds/123/order")
+    # @param path    [String]  path relative to API_BASE_URL (e.g. "clouds/123/orders")
     # @param params  [Hash]    query parameters
     # @param body    [Hash, nil] request body (will be JSON-encoded)
     # @param headers [Hash]    additional request headers
