@@ -70,14 +70,14 @@ module Dotypos
 
     def assign_envelope(envelope)
       @data                = Array(envelope[:data]).map { |item| Resource.new(item) }
-      @current_page        = envelope[:current_page]
-      @per_page            = envelope[:per_page]
-      @total_items_on_page = envelope[:total_items_on_page]
-      @total_items_count   = envelope[:total_items_count]
-      @first_page          = envelope[:first_page]
-      @last_page           = envelope[:last_page]
-      @next_page_number    = envelope[:next_page]
-      @prev_page_number    = envelope[:prev_page]
+      @current_page        = envelope[:current_page]&.to_i
+      @per_page            = envelope[:per_page]&.to_i
+      @total_items_on_page = envelope[:total_items_on_page]&.to_i
+      @total_items_count   = envelope[:total_items_count]&.to_i
+      @first_page          = envelope[:first_page]&.to_i
+      @last_page           = envelope[:last_page]&.to_i
+      @next_page_number    = envelope[:next_page]&.to_i
+      @prev_page_number    = envelope[:prev_page]&.to_i
     end
   end
 end
