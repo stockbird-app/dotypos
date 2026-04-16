@@ -70,7 +70,7 @@ module Dotypos
     end
 
     def validate_token_response!(response)
-      return if response.status == 200
+      return if response.success?
 
       raise Dotypos::AuthenticationError.new(
         "Failed to obtain access token",
