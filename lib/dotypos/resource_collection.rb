@@ -37,8 +37,16 @@ module Dotypos
 
     # Returns a PagedResult.
     #
-    # @param params [Hash] query parameters: page:, limit:, filter:, sort:
+    # @param params [Hash] query parameters: page:, limit:, filter:, sort:, include:
     #   filter can be a String (raw API filter) or a FilterBuilder instance.
+    #   include accepts a Symbol, String, or Array of either, and is converted to a
+    #   camelCase comma-separated string for the API. Currently only meaningful for
+    #   the orders endpoint; supported values per the API docs:
+    #     :order_items  – embed order items inside each order
+    #     :money_logs   – embed money logs inside each order
+    #   Examples:
+    #     client.orders.list(include: :order_items)
+    #     client.orders.list(include: [:order_items, :money_logs])
     def list(params = {})
       params = normalize_list_params(params)
       # BC1 header makes the API return 200 + empty pagination JSON when no
@@ -141,7 +149,14 @@ module Dotypos
 
     def normalize_list_params(params)
       params = params.merge(filter: params[:filter].to_s) if params[:filter].is_a?(FilterBuilder)
+      params = params.merge(include: normalize_include(params[:include])) if params.key?(:include)
       params.compact
+    end
+
+    def normalize_include(value)
+      return nil if value.nil?
+
+      Array(value).map { |v| KeyTransformer.camel_key(v) }.join(",")
     end
   end
 end

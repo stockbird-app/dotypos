@@ -21,6 +21,12 @@ module Dotypos
   #   filter = Dotypos::FilterBuilder.build { |f| f.where(:deleted, :eq, false) }
   #   client.products.list(filter: filter, sort: "-version_date")
   #
+  #   # Include nested entities in one request (orders endpoint only)
+  #   result = client.orders.list(include: :order_items)
+  #   result.data.first.order_items.first.quantity  # => nested Resource with dot access
+  #   # Multiple includes:
+  #   client.orders.list(include: [:order_items, :money_logs])
+  #
   #   # Full CRUD
   #   customer = client.customers.get("789")
   #   client.customers.update(customer, name: "New Name")

@@ -9,10 +9,14 @@ module Dotypos
   # The ETag received from a GET response is stored on the object and is
   # automatically used by ResourceCollection#update and #replace.
   class Resource
+    # Known nested collection keys that are wrapped as Resource instances when
+    # returned by the API via the `include` query parameter.
+    NESTED_COLLECTION_KEYS = %i[order_items money_logs].freeze
+
     attr_accessor :etag
 
     def initialize(attributes, etag: nil)
-      @attributes = KeyTransformer.to_snake(attributes)
+      @attributes = wrap_nested_collections(KeyTransformer.to_snake(attributes))
       @etag       = etag
     end
 
@@ -52,10 +56,20 @@ module Dotypos
 
     private
 
+    def wrap_nested_collections(attrs)
+      NESTED_COLLECTION_KEYS.each do |key|
+        next unless attrs[key].is_a?(Array)
+
+        attrs[key] = attrs[key].map { |item| item.is_a?(Hash) ? Resource.new(item) : item }
+      end
+      attrs
+    end
+
     def deep_dup(obj)
       case obj
-      when Hash  then obj.transform_values { |v| deep_dup(v) }
-      when Array then obj.map { |v| deep_dup(v) }
+      when Resource then obj.to_h
+      when Hash     then obj.transform_values { |v| deep_dup(v) }
+      when Array    then obj.map { |v| deep_dup(v) }
       else obj
       end
     end

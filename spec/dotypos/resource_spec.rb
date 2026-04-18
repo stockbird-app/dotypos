@@ -87,6 +87,43 @@ RSpec.describe Dotypos::Resource do
     end
   end
 
+  describe "nested collection wrapping" do
+    let(:item_payload) { { "id" => "99", "quantity" => 2, "totalPrice" => "19.80" } }
+
+    it "wraps orderItems arrays as Resource instances" do
+      order = described_class.new({ "id" => "1", "orderItems" => [item_payload] })
+      expect(order.order_items).to be_an(Array)
+      expect(order.order_items.first).to be_a(described_class)
+    end
+
+    it "provides dot access on nested order item resources" do
+      order = described_class.new({ "id" => "1", "orderItems" => [item_payload] })
+      expect(order.order_items.first.quantity).to eq(2)
+      expect(order.order_items.first.total_price).to eq("19.80")
+    end
+
+    it "wraps moneyLogs arrays as Resource instances" do
+      log_payload = { "id" => "55", "amount" => "10.00" }
+      order = described_class.new({ "id" => "1", "moneyLogs" => [log_payload] })
+      expect(order.money_logs.first).to be_a(described_class)
+      expect(order.money_logs.first.amount).to eq("10.00")
+    end
+
+    it "leaves other nested arrays untouched" do
+      order = described_class.new({ "id" => "1", "tags" => %w[foo bar] })
+      expect(order.tags).to eq(%w[foo bar])
+    end
+
+    it "returns plain hashes for nested items via #to_h (no Resource instances leak)" do
+      order = described_class.new({ "id" => "1", "orderItems" => [item_payload] })
+      h = order.to_h
+      expect(h[:order_items]).to be_an(Array)
+      expect(h[:order_items].first).to be_a(Hash)
+      expect(h[:order_items].first).not_to be_a(described_class)
+      expect(h[:order_items].first[:total_price]).to eq("19.80")
+    end
+  end
+
   describe "#==" do
     it "is equal to another Resource with same attributes" do
       other = described_class.new(
@@ -98,6 +135,13 @@ RSpec.describe Dotypos::Resource do
     it "is not equal to a Resource with different attributes" do
       other = described_class.new({ "name" => "Different" })
       expect(resource).not_to eq(other)
+    end
+
+    it "is equal to another Resource with the same nested orderItems" do
+      payload = { "id" => "1", "orderItems" => [{ "id" => "99", "quantity" => 2 }] }
+      a = described_class.new(payload)
+      b = described_class.new(payload)
+      expect(a).to eq(b)
     end
   end
 end

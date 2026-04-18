@@ -69,15 +69,27 @@ module Dotypos
     private
 
     def assign_envelope(envelope)
-      @data                = Array(envelope[:data]).map { |item| Resource.new(item) }
+      @data = Array(envelope[:data]).map { |item| Resource.new(item) }
+      assign_pagination(envelope)
+    end
+
+    def assign_pagination(envelope)
+      assign_counts(envelope)
+      assign_page_numbers(envelope)
+    end
+
+    def assign_counts(envelope)
       @current_page        = envelope[:current_page]&.to_i
       @per_page            = envelope[:per_page]&.to_i
       @total_items_on_page = envelope[:total_items_on_page]&.to_i
       @total_items_count   = envelope[:total_items_count]&.to_i
-      @first_page          = envelope[:first_page]&.to_i
-      @last_page           = envelope[:last_page]&.to_i
-      @next_page_number    = envelope[:next_page]&.to_i
-      @prev_page_number    = envelope[:prev_page]&.to_i
+    end
+
+    def assign_page_numbers(envelope)
+      @first_page       = envelope[:first_page]&.to_i
+      @last_page        = envelope[:last_page]&.to_i
+      @next_page_number = envelope[:next_page]&.to_i
+      @prev_page_number = envelope[:prev_page]&.to_i
     end
   end
 end

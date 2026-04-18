@@ -73,6 +73,82 @@ RSpec.describe Dotypos::ResourceCollection do
       expect(stub).to have_been_requested.once
     end
 
+    context "with include: parameter" do
+      it "translates a snake_case symbol to camelCase include query param" do
+        stub = stub_request(:get, "#{API_BASE}/orders")
+               .with(query: hash_including("include" => "orderItems"))
+               .to_return(status: 200, body: json(list_response), headers: api_headers)
+
+        collection.list(include: :order_items)
+        expect(stub).to have_been_requested.once
+      end
+
+      it "translates an array of snake_case symbols to a comma-separated camelCase string" do
+        stub = stub_request(:get, "#{API_BASE}/orders")
+               .with(query: hash_including("include" => "orderItems,moneyLogs"))
+               .to_return(status: 200, body: json(list_response), headers: api_headers)
+
+        collection.list(include: %i[order_items money_logs])
+        expect(stub).to have_been_requested.once
+      end
+
+      it "passes a raw camelCase string through unchanged" do
+        stub = stub_request(:get, "#{API_BASE}/orders")
+               .with(query: hash_including("include" => "orderItems"))
+               .to_return(status: 200, body: json(list_response), headers: api_headers)
+
+        collection.list(include: "orderItems")
+        expect(stub).to have_been_requested.once
+      end
+
+      it "omits the include param when nil" do
+        stub = stub_request(:get, "#{API_BASE}/orders")
+               .with(query: {})
+               .to_return(status: 200, body: json(list_response), headers: api_headers)
+
+        collection.list(include: nil)
+        expect(stub).to have_been_requested.once
+      end
+
+      it "exposes nested orderItems as Resource instances with dot access" do
+        item_payload = { "id" => "99", "quantity" => 2, "totalPrice" => "19.80" }
+        response_with_items = list_response.merge(
+          data: [order_payload.merge("orderItems" => [item_payload])]
+        )
+        stub_request(:get, "#{API_BASE}/orders")
+          .with(query: hash_including("include" => "orderItems"))
+          .to_return(status: 200, body: json(response_with_items), headers: api_headers)
+
+        order = collection.list(include: :order_items).data.first
+        expect(order.order_items).to be_an(Array)
+        expect(order.order_items.first).to be_a(Dotypos::Resource)
+        expect(order.order_items.first.quantity).to eq(2)
+      end
+
+      it "carries the include param through to next_page requests" do
+        page1_response = list_response.merge(
+          currentPage: 1, perPage: 1, totalItemsOnPage: 1, totalItemsCount: 2,
+          nextPage: 2
+        )
+        page2_response = list_response.merge(
+          currentPage: 2, perPage: 1, totalItemsOnPage: 1, totalItemsCount: 2,
+          nextPage: nil
+        )
+
+        stub_request(:get, "#{API_BASE}/orders")
+          .with(query: hash_including("include" => "orderItems", "page" => "1"))
+          .to_return(status: 200, body: json(page1_response), headers: api_headers)
+
+        next_stub = stub_request(:get, "#{API_BASE}/orders")
+                    .with(query: hash_including("include" => "orderItems", "page" => "2"))
+                    .to_return(status: 200, body: json(page2_response), headers: api_headers)
+
+        result = collection.list(page: 1, include: :order_items)
+        result.next_page
+        expect(next_stub).to have_been_requested.once
+      end
+    end
+
     it "sends Allow-Version: BC1 header so empty collections return 200 instead of 404" do
       stub = stub_request(:get, "#{API_BASE}/orders")
              .with(headers: { "Allow-Version" => "BC1" })
