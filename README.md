@@ -66,6 +66,7 @@ The following resource accessors are available on the client:
 | `client.reservations` | `reservations` |
 | `client.stock_logs` | `stock-logs` |
 | `client.suppliers` | `suppliers` |
+| `client.tables` | `tables` |
 | `client.tags` | `tags` |
 | `client.warehouses` | `warehouses` |
 | `client.webhooks` | `webhooks` |

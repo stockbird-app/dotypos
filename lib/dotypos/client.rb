@@ -50,6 +50,7 @@ module Dotypos
       reservations: "reservations",
       stock_logs: "stock-logs",
       suppliers: "suppliers",
+      tables: "tables",
       tags: "tags",
       warehouses: "warehouses",
       webhooks: "webhooks",
